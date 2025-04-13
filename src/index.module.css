@@ -5,8 +5,15 @@ body {
   font-family: sans-serif;
   line-height: 1.5;
 }
+.pageContainer {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+.title {
+  text-align: center;
+}
 
-h1,
 h2,
 h3,
 h4,

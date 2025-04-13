@@ -1,56 +1,43 @@
-import Description from "./components/Description/Description";
-import Options from "./components/Options/Options";
 import { useState, useEffect } from "react";
-import Feedback from "./components/Feedback/Feedback";
-import Notification from "./components/Notification/Notification";
+import myContacts from "./contacts.json";
+import ContactList from "./components/ContactList/ContactList";
+import SearchBox from "./components/SearchBox/SearchBox";
+import ContactForm from "./components/ContactForm/ContactForm";
+import css from "./index.module.css";
 
 export default function App() {
-  const [feedback, setFeedback] = useState(() => {
-    const savedFeedback = localStorage.getItem("feedback");
-    return savedFeedback
-      ? JSON.parse(savedFeedback)
-      : { good: 0, neutral: 0, bad: 0 };
+  const [contacts, setContacts] = useState(() => {
+    const savedContact = localStorage.getItem("contacts");
+    return savedContact ? JSON.parse(savedContact) : myContacts;
   });
+  const [filter, setFilter] = useState("");
 
-  const totalFeedback = feedback.good + feedback.neutral + feedback.bad;
-  const positiveFeedback = Math.round((feedback.good / totalFeedback) * 100);
-
-  const updateFeedback = (feedbackType) => {
-    const updatedFeedback = {
-      ...feedback,
-      [feedbackType]: feedback[feedbackType] + 1,
-    };
-    setFeedback(updatedFeedback);
-    localStorage.setItem("feedback", JSON.stringify(updatedFeedback));
+  const addContact = (newContact) => {
+    setContacts((prevContacts) => {
+      return [...prevContacts, newContact];
+    });
   };
 
-  const resetFeedback = () => {
-    const deleteFeedback = { good: 0, neutral: 0, bad: 0 };
-    setFeedback(deleteFeedback);
-    localStorage.setItem("feedback", JSON.stringify(deleteFeedback));
+  const deleteContact = (contactId) => {
+    setContacts((prevContacts) => {
+      return prevContacts.filter((contact) => contact.id !== contactId);
+    });
   };
+
+  const filterContact = contacts.filter((contact) =>
+    contact.name.toLowerCase().includes(filter.toLowerCase())
+  );
 
   useEffect(() => {
-    localStorage.setItem("feedback", JSON.stringify(feedback));
-  }, [feedback]);
+    localStorage.setItem("contacts", JSON.stringify(contacts));
+  }, [contacts]);
 
   return (
-    <div>
-      <Description />
-      <Options
-        updateFeedback={updateFeedback}
-        resetFeedback={resetFeedback}
-        total={totalFeedback}
-      />
-      {totalFeedback > 0 ? (
-        <Feedback
-          feedback={feedback}
-          total={totalFeedback}
-          positive={positiveFeedback}
-        />
-      ) : (
-        <Notification message="No feedback yet" />
-      )}
+    <div className={css.pageContainer}>
+      <h1 className={css.title}>Phonebook </h1>
+      <ContactForm onAdd={addContact} />
+      <SearchBox value={filter} onFilter={setFilter} />
+      <ContactList contacts={filterContact} onDelete={deleteContact} />
     </div>
   );
 }
